@@ -20,6 +20,7 @@ class NaiveBayes(Classifier):
         labelcount = defaultdict(lambda: 0)
         """feature count totals hits for each feature for each label"""
         featurecount = defaultdict(lambda: defaultdict(lambda: 0))
+        instancecount = 0
         for instance in instances:
             for feature in instance.features():
                 labelcount[instance.label] += 1
@@ -31,10 +32,16 @@ class NaiveBayes(Classifier):
         		model[label][feature] = math.log( 
         			(featurecount[feature] + smoothing_factor) / 
         			(labelcount[label] + smoothing_factor*2) )
+        """compute priors from label counts"""
+        instancecount = sum(labelcount.values())
+        for label in labelcount.keys():
+        	model[label]['*PRIOR*'] = math.log(labelcount[label] / instancecount)
+
 
 
     def classify(self, instance):
         """Classify an instance using the log probabilities computed during training."""
         for feature in instance.features():
-            if feature in self.seen:
-                return self.seen[feature]
+            """sum (log) probabilities in each label and return highest"""
+
+            for label in 
