@@ -85,6 +85,17 @@ class NaiveBayesTest(TestCase):
         classifier.train(train)
         self.assertGreater(accuracy(classifier, test), 0.55)
 
+    def test_save_load(self):
+        """Test saving and loading with blog classifier"""
+        train, test = self.split_blogs_corpus(BlogFeatures)
+        classifier = NaiveBayes()
+        classifier.train(train)
+        classifier.save("model")
+
+        class2 = NaiveBayes()
+        class2.load("model")
+        self.assertGreater(accuracy(class2, test), 0.55)
+
 if __name__ == '__main__':
     # Run all of the tests, print the results, and exit.
     main(verbosity=2)

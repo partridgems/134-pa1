@@ -7,6 +7,12 @@ import math
 
 smoothing_factor = .2
 
+"""Used in defaultdict to set the 'miss' probability value"""
+"""It was experimentally determined that a greater penalty for misses 
+than the standard smoothing produced better results"""
+def default_probability():
+    return math.log( smoothing_factor/(1000*smoothing_factor) )
+
 class NaiveBayes(Classifier):
     u"""A naïve Bayes classifier."""
 
@@ -36,8 +42,7 @@ class NaiveBayes(Classifier):
         """from feature counts, compute class conditional probability estimates as log"""
         for label in labelcount.keys():
             """instantiate dictionary for this label with default penalty for words not seen"""
-            modeldata[label] = defaultdict(lambda: math.log( 
-                smoothing_factor/(1000*smoothing_factor) ) )
+            modeldata[label] = defaultdict( default_probability )
             for feature in featurecount[label].keys():
                 modeldata[label][feature] = math.log( 
                     (featurecount[label][feature] + smoothing_factor) / 
