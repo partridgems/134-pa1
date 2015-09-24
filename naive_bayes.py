@@ -1,10 +1,11 @@
 # -*- mode: Python; coding: utf-8 -*-
 
+from __future__ import division
 from classifier import Classifier
 from collections import defaultdict
 import math
 
-smoothing_factor = 0.5
+smoothing_factor = .2
 
 class NaiveBayes(Classifier):
     u"""A naïve Bayes classifier."""
@@ -34,7 +35,9 @@ class NaiveBayes(Classifier):
 
         """from feature counts, compute class conditional probability estimates as log"""
         for label in labelcount.keys():
-            modeldata[label] = defaultdict(lambda: math.log( smoothing_factor/(2*smoothing_factor) ) )
+            """instantiate dictionary for this label with default penalty for words not seen"""
+            modeldata[label] = defaultdict(lambda: math.log( 
+                smoothing_factor/(1000*smoothing_factor) ) )
             for feature in featurecount[label].keys():
                 modeldata[label][feature] = math.log( 
                     (featurecount[label][feature] + smoothing_factor) / 
@@ -43,8 +46,7 @@ class NaiveBayes(Classifier):
         """compute priors from label counts"""
         instancecount = sum(labelcount.values())
         for label in labelcount.keys():
-            # modeldata[label]['*PRIOR*'] = math.log(labelcount[label] / instancecount)
-            modeldata[label]['*PRIOR*'] = math.log(.5)
+            modeldata[label]['*PRIOR*'] = math.log(labelcount[label] / instancecount)
 
         modeldata.pop('', None)
         self.set_model(modeldata)

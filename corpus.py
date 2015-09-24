@@ -116,11 +116,17 @@ class BlogsCorpus(CSVCorpus):
 
 class BlogFeatures(Document):
     def features(self):
+        """features not part of bag_of_words"""
+        misc_features = []
+        """long posts"""
+        if len(self.data) > 1000:
+            misc_features += ["*LONG POST*"]
+
         """Less trivially tokenized words"""
         """Lowercase, no punctuation"""
         words = regex.sub(ur"\p{P}+","",self.data).lower().split()
         # return filter(lambda x: x not in stopwords.words('english'), words)
         """Crude stemming: get up to first 5 chars"""
-        return [w[0:3] for w in words]
+        return [w[0:3] for w in words] + misc_features
         # stemmer = SnowballStemmer('porter')
         # return [stemmer.stem(w) for w in filter(lambda x: x not in stopwords.words('english'), words)]
