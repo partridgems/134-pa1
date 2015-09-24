@@ -19,14 +19,8 @@ class EvenOdd(Document):
 
 class BagOfWords(Document):
     def features(self):
-        """Less trivially tokenized words"""
-        """Lowercase, no punctuation"""
-        words = regex.sub(ur"\p{P}+","",self.data).lower().split()
-        # return filter(lambda x: x not in stopwords.words('english'), words)
-        """Crude stemming: get up to first 5 chars"""
-        return [w[0:3] for w in words]
-        # stemmer = SnowballStemmer('porter')
-        # return [stemmer.stem(w) for w in filter(lambda x: x not in stopwords.words('english'), words)]
+        """Trivially tokenized words."""
+        return self.data.split()
 
 class Name(Document):
     def features(self, letters="abcdefghijklmnopqrstuvwxyz"):
