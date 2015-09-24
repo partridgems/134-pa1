@@ -1,8 +1,11 @@
 # -*- mode: Python; coding: utf-8 -*-
 
 from __future__ import division
+from nltk.corpus import stopwords
+from nltk.stem.snowball import SnowballStemmer
+import regex
 
-from corpus import Document, BlogsCorpus, NamesCorpus
+from corpus import Document, BlogsCorpus, NamesCorpus, BlogFeatures
 from naive_bayes import NaiveBayes
 
 import sys
@@ -16,17 +19,31 @@ class EvenOdd(Document):
 
 class BagOfWords(Document):
     def features(self):
-        """Trivially tokenized words."""
-        return self.data.split()
+        """Less trivially tokenized words"""
+        """Lowercase, no punctuation"""
+        words = regex.sub(ur"\p{P}+","",self.data).lower().split()
+        # return filter(lambda x: x not in stopwords.words('english'), words)
+        """Crude stemming: get up to first 5 chars"""
+        return [w[0:3] for w in words]
+        # stemmer = SnowballStemmer('porter')
+        # return [stemmer.stem(w) for w in filter(lambda x: x not in stopwords.words('english'), words)]
 
 class Name(Document):
     def features(self, letters="abcdefghijklmnopqrstuvwxyz"):
         """From NLTK's names_demo_features: first & last letters, how many
         of each letter, and which letters appear."""
         name = self.data
-        return ([name[0].lower(), name[-1].lower()] +
-                [name.lower().count(letter) for letter in letters] +
-                [letter in name.lower() for letter in letters])
+        feat = []
+        """get first letter and last"""
+        feat += ["fl" + name[0]]
+        feat += ["ll" + name[-1]]
+        """get whether name contains a letter"""
+        feat += ["ct" + letter for letter in name.lower()]
+
+        # return ([name[0].lower(), name[-1].lower()] +
+        #         [name.lower().count(letter) for letter in letters] +
+        #         [letter in name.lower() for letter in letters])
+        return feat
 
 def accuracy(classifier, test, verbose=sys.stderr):
     correct = [classifier.classify(x) == x.label for x in test]
@@ -69,7 +86,7 @@ class NaiveBayesTest(TestCase):
 
     def test_blogs_bag(self):
         """Classify blog authors using bag-of-words"""
-        train, test = self.split_blogs_corpus(BagOfWords)
+        train, test = self.split_blogs_corpus(BlogFeatures)
         classifier = NaiveBayes()
         classifier.train(train)
         self.assertGreater(accuracy(classifier, test), 0.55)

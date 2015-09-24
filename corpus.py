@@ -9,6 +9,10 @@ from csv import reader as csv_reader
 from glob import glob
 from os.path import basename, dirname, split, splitext
 
+from nltk.corpus import stopwords
+from nltk.stem.snowball import SnowballStemmer
+import regex
+
 class Document(object):
     """A document completely characterized by its features."""
 
@@ -20,8 +24,9 @@ class Document(object):
         self.source = source
 
     def __repr__(self):
-        return ("<%s: %s>" % (self.label, self.abbrev()) if self.label else
-                "%s" % self.abbrev())
+        return str(self.data)
+        # return ("<%s: %s>" % (self.label, self.abbrev()) if self.label else
+        #         "%s" % self.abbrev())
 
     def abbrev(self):
         return (self.data if len(self.data) < self.max_display_data else
@@ -108,3 +113,14 @@ class BlogsCorpus(CSVCorpus):
     def __init__(self, datafiles="blog-gender-dataset.csv",
                  document_class=Document):
         super(BlogsCorpus, self).__init__(datafiles, document_class)
+
+class BlogFeatures(Document):
+    def features(self):
+        """Less trivially tokenized words"""
+        """Lowercase, no punctuation"""
+        words = regex.sub(ur"\p{P}+","",self.data).lower().split()
+        # return filter(lambda x: x not in stopwords.words('english'), words)
+        """Crude stemming: get up to first 5 chars"""
+        return [w[0:3] for w in words]
+        # stemmer = SnowballStemmer('porter')
+        # return [stemmer.stem(w) for w in filter(lambda x: x not in stopwords.words('english'), words)]

@@ -19,33 +19,40 @@ class NaiveBayes(Classifier):
     def train(self, instances):
         modeldata = {}
         """Count number of documents containing feature and total count of each label"""
+
         """labelcount totals instances for each label"""
         labelcount = defaultdict(lambda: 0)
+
         """feature count totals hits for each feature for each label"""
+        """NOTE: All features are considered hits in a dense representation"""
         featurecount = defaultdict(lambda: defaultdict(lambda: 0))
         instancecount = 0
         for instance in instances:
             labelcount[instance.label] += 1
             for feature in instance.features():
                 featurecount[instance.label][feature] += 1
+
         """from feature counts, compute class conditional probability estimates as log"""
         for label in labelcount.keys():
-            modeldata[label] = defaultdict(lambda: smoothing_factor/(2*smoothing_factor))
-            for feature in featurecount.keys():
+            modeldata[label] = defaultdict(lambda: math.log( smoothing_factor/(2*smoothing_factor) ) )
+            for feature in featurecount[label].keys():
                 modeldata[label][feature] = math.log( 
                     (featurecount[label][feature] + smoothing_factor) / 
                     (labelcount[label] + smoothing_factor*2) )
+
         """compute priors from label counts"""
         instancecount = sum(labelcount.values())
         for label in labelcount.keys():
             # modeldata[label]['*PRIOR*'] = math.log(labelcount[label] / instancecount)
             modeldata[label]['*PRIOR*'] = math.log(.5)
 
+        modeldata.pop('', None)
         self.set_model(modeldata)
 
     def classify(self, instance):
         """Classify an instance using the log probabilities computed during training."""
         labelsum = {}
+
         """initialize with priors"""
         for label in self.model.keys():
             labelsum[label] = self.model[label]['*PRIOR*']
