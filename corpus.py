@@ -24,9 +24,9 @@ class Document(object):
         self.source = source
 
     def __repr__(self):
-        return str(self.data)
-        # return ("<%s: %s>" % (self.label, self.abbrev()) if self.label else
-        #         "%s" % self.abbrev())
+        # return str(self.data)
+        return ("<%s: %s>" % (self.label, self.abbrev()) if self.label else
+                "%s" % self.abbrev())
 
     def abbrev(self):
         return (self.data if len(self.data) < self.max_display_data else

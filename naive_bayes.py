@@ -27,10 +27,10 @@ class NaiveBayes(Classifier):
         modeldata = {}
         """Count number of documents containing feature and total count of each label"""
 
-        """labelcount totals instances for each label"""
+        """labelcount totals instances for each label: c(y)"""
         labelcount = defaultdict(lambda: 0)
 
-        """feature count totals hits for each feature for each label"""
+        """feature count totals hits for each feature for each label: c(x,y)"""
         """NOTE: All features are considered hits in a dense representation"""
         featurecount = defaultdict(lambda: defaultdict(lambda: 0))
         instancecount = 0
@@ -40,6 +40,7 @@ class NaiveBayes(Classifier):
                 featurecount[instance.label][feature] += 1
 
         """from feature counts, compute class conditional probability estimates as log"""
+        """p(x|y) = c(x,y)/c(y)"""
         for label in labelcount.keys():
             """instantiate dictionary for this label with default penalty for words not seen"""
             modeldata[label] = defaultdict( default_probability )
@@ -53,6 +54,7 @@ class NaiveBayes(Classifier):
         for label in labelcount.keys():
             modeldata[label]['*PRIOR*'] = math.log(labelcount[label] / instancecount)
 
+        """For some reason, the blog posts have a blank, '' label. This eliminates it"""
         modeldata.pop('', None)
         self.set_model(modeldata)
 
@@ -60,12 +62,12 @@ class NaiveBayes(Classifier):
         """Classify an instance using the log probabilities computed during training."""
         labelsum = {}
 
-        """initialize with priors"""
+        """initialize class probabilities with priors"""
         for label in self.model.keys():
             labelsum[label] = self.model[label]['*PRIOR*']
 
         for feature in instance.features():
-            """sum (log) probabilities in each label and return highest"""
+            """sum (log) probabilities in each class and return highest scoring class"""
             for label in self.model.keys():
                 labelsum[label] += self.model[label][feature]
 

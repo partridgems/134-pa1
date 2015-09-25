@@ -26,6 +26,7 @@ class Name(Document):
     def features(self, letters="abcdefghijklmnopqrstuvwxyz"):
         """From NLTK's names_demo_features: first & last letters, how many
         of each letter, and which letters appear."""
+        """Changed from above description to match feature encoding for classifier"""
         name = self.data
         feat = []
         """get first letter and last"""
@@ -33,10 +34,6 @@ class Name(Document):
         feat += ["ll" + name[-1]]
         """get whether name contains a letter"""
         feat += ["ct" + letter for letter in name.lower()]
-
-        # return ([name[0].lower(), name[-1].lower()] +
-        #         [name.lower().count(letter) for letter in letters] +
-        #         [letter in name.lower() for letter in letters])
         return feat
 
 def accuracy(classifier, test, verbose=sys.stderr):
